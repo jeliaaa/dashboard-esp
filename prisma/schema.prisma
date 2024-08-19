@@ -1,0 +1,15 @@
+datasource db {
+  provider = "mongodb"
+  url      = "mongodb+srv://root:mm-291-xx@cluster0.ab1cd.mongodb.net/myDatabase?retryWrites=true&w=majority"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model SensorData {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  x          Float
+  y          Float
+  timestamp  DateTime @default(now())
+}
