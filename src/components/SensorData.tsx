@@ -1,44 +1,37 @@
-// components/SensorData.js
-"use client"
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+'use client'
+import { useEffect, useState } from 'react';
 
 const SensorData = () => {
-  const [data, setData] = useState([]);
-  const [error, setError] = useState(null);
+  const [sensorData, setSensorData] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('/api/sensor-data');
-        setData(response.data);
-      } catch (err : any) {
-        setError(err.message);
-      }
-    };
-
-    fetchData();
-    const interval = setInterval(fetchData, 30000); // Fetch data every 30 seconds
-
-    return () => clearInterval(interval);
+    fetch('/api/sensor-data')
+      .then((response) => response.json())
+      .then((data) => {
+        setSensorData(data);
+      });
   }, []);
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Joystick Sensor Data</h1>
-      {error ? (
-        <p className="text-red-500">{error}</p>
-      ) : (
-        <div className="grid grid-cols-1 gap-4">
-          {data.map((entry : any) => (
-            <div key={entry.id} className="p-4 border rounded-lg">
-              <p><strong>X:</strong> {entry.x}</p>
-              <p><strong>Y:</strong> {entry.y}</p>
-              <p><strong>Timestamp:</strong> {new Date(entry.timestamp).toLocaleString()}</p>
-            </div>
+    <div className="overflow-x-auto">
+      <table className="min-w-full bg-white border">
+        <thead>
+          <tr className='text-black'>
+            <th className="px-4 py-2 border">Timestamp</th>
+            <th className="px-4 py-2 border">X Value</th>
+            <th className="px-4 py-2 border">Y Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sensorData.map((data : any, index) => (
+            <tr key={index} className='text-black'>
+              <td className="px-4 py-2 border">{new Date(data.createdAt).toLocaleString()}</td>
+              <td className="px-4 py-2 border">{data.x}</td>
+              <td className="px-4 py-2 border">{data.y}</td>
+            </tr>
           ))}
-        </div>
-      )}
+        </tbody>
+      </table>
     </div>
   );
 };
