@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import io from 'socket.io-client';
 
-const socket = io('https://info-ej7a8rsse-jeliaaas-projects.vercel.app/'); // Your Vercel app URL
+const socket = io('https://infoweb-jeliaaas-projects.vercel.app/'); // Your Vercel app URL
 
 const DamageStatus = () => {
     const [damageStatus, setDamageStatus] = useState('');
