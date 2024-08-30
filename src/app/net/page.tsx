@@ -1,33 +1,60 @@
 'use client'
 import { useEffect, useState } from 'react';
-import io from 'socket.io-client';
 
-const socket = io('https://infoweb-jeliaaas-projects.vercel.app/'); // Your Vercel app URL
+const SensorData = () => {
+  const [sensorData, setSensorData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-const DamageStatus = () => {
-    const [damageStatus, setDamageStatus] = useState('');
+  const fetchData = () => {
+    setLoading(true);
+    fetch('/api/net')
+      .then((response) => response.json())
+      .then((data) => {
+        setSensorData(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch data:', err);
+        setError('Failed to fetch data.');
+        setLoading(false);
+      });
+  };
 
-    useEffect(() => {
-        socket.on('connect', () => {
-            console.log('Connected to server.');
-        });
+  useEffect(() => {
+    fetchData(); // Fetch data immediately on component mount
 
-        // Listen for the update event
-        socket.on('update', (data : any) => {
-            console.log('Received update notification:', data);
-            setDamageStatus(data.status); // Update state with the damage status
-        });
+    const interval = setInterval(() => {
+      fetchData(); // Fetch data every 5 seconds
+    }, 5000);
 
-        return () => {
-            socket.off('update');
-        };
-    }, []);
+    return () => clearInterval(interval); // Clear interval on component unmount
+  }, []);
 
-    return (
-        <div>
-            <h1>Damage Status: {damageStatus}</h1>
-        </div>
-    );
+  return (
+    <div className="overflow-x-auto">
+      {loading && <p>Loading...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+      {!loading && !error && (
+        <table className="min-w-full bg-white border">
+          <thead>
+            <tr className='text-black'>
+              <th className="px-4 py-2 border">Timestamp</th>
+              <th className="px-4 py-2 border">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sensorData.map((data: any, index) => (
+              <tr key={index} className='text-black'>
+                <td className="px-4 py-2 border">{new Date(data.createdAt).toLocaleString()}</td>
+                <td className="px-4 py-2 border">{data.status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
 };
 
-export default DamageStatus;
+export default SensorData;
